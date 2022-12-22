@@ -6,3 +6,9 @@ def get_last_electrode_num(robot_name):
 
 def get_last_milling(robot_name):
     return 50
+
+def get_last_point_applied():
+    return
+
+def revemove_line_in_SQL():
+    return
