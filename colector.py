@@ -9,20 +9,22 @@ class protocol_current_values():
         """
         """
         self._path = path_manipulation()
-        self._line_name = self._path.get_line_name
         self._sql = sql_manipulation()
 
-        try:
-            self._df = pd.read_csv(self._path.name_file(file_name="Protocolo valores de corrente"), quoting=csv.QUOTE_NONE, sep = ";")
-        except:
-            TypeError("CSV reading failed")
+        for pc in self._path.len_pcs:
+            for path in self._path.len_paths:
+                self._line_name = self._path.get_line_name
+                try:
+                    self._df = pd.read_csv(self._path.name_file(path), quoting=csv.QUOTE_NONE, sep = ";")
+                except:
+                    TypeError("CSV reading failed")
 
-        self.__data_formatting()
-        self._filtered_df = self._df
+                self.__data_formatting()
+                self._filtered_df = self._df
 
-        self._list_name = self._df['timerName'].unique()
+                self._list_name = self._df['timerName'].unique()
 
-        self.__main()        
+                self.__main()        
 
     def __data_formatting(self):
         """
