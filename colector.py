@@ -4,18 +4,20 @@ from paths import path_manipulation
 import csv
 from SQL_manipulation import sql_manipulation
 
-class protocol_current_values():
+class electrode_count():
     def __init__(self):
         """
+        Constructor method
+        
         """
         self._path = path_manipulation()
         self._sql = sql_manipulation()
 
         for pc in self._path.len_pcs:
-            for path in self._path.len_paths:
-                self._line_name = self._path.get_line_name
+            self._line_name = self._path.get_line_name(pc)
+            for path in self._path.len_paths:           
                 try:
-                    self._df = pd.read_csv(self._path.name_file(path), quoting=csv.QUOTE_NONE, sep = ";")
+                    self._df = pd.read_csv(self._path.file_path(path), quoting=csv.QUOTE_NONE, sep = ";")
                 except:
                     TypeError("CSV reading failed")
 
@@ -28,6 +30,7 @@ class protocol_current_values():
 
     def __data_formatting(self):
         """
+        Fixes formatting of columns imported from CSV.
         """
         self._df.columns = self._df.columns.str.replace(r'"', '')
         self._df['timerName']= self._df['timerName'].str.replace(r'"', '')
@@ -51,10 +54,12 @@ class protocol_current_values():
             self.__check_electrode_change(robot_name)
 
     def __get_last_electrode(self, tools,robot_name):
-            _last_electrode_num = []
-            for tool in tools:
-                _last_electrode_num.append(self._sql.get_last_electrode_num(self._line_name,robot_name,int(tool)))
-            return _last_electrode_num
+        """
+        """
+        _last_electrode_num = []
+        for tool in tools:
+            _last_electrode_num.append(self._sql.get_last_electrode_num(self._line_name,robot_name,int(tool)))
+        return _last_electrode_num
     
     def __check_electrode_change(self, robot_name):
         """
@@ -115,6 +120,6 @@ class protocol_current_values():
 
 
 
-wellding = protocol_current_values()
-print("End code")
+wellding = electrode_count()
+print("End code")#Debug print
         
