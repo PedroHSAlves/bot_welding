@@ -15,25 +15,58 @@ class sql_manipulation():
         
         self._mycursor = self._mydb.cursor()
 
-    def post_data(self, electrode_num: int, name_robot: str, n_points_applied: int, n_millins: int,electrode_no: int, time: str):
-        sql = "INSERT INTO wellding (electrode_num, name_robot, n_points_applied, n_millins,tool, time) VALUES (%s,%s,%s,%s,%s,%s)"
-        val = (electrode_num, name_robot, n_points_applied, n_millins,electrode_no, time)  
+    def post_data_wellding(self, line_name: str,electrode_num: int, name_robot: str, n_points_applied: int, n_millins: int,electrode_no: int, time: str):
+        sql = "INSERT INTO wellding (line,electrode_num, name_robot, n_points_applied, n_millins,tool, time) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+        val = (line_name,electrode_num, name_robot, n_points_applied, n_millins,electrode_no, time)  
         self._mycursor.execute(sql,val)
 
         self._mydb.commit()
         print(self._mycursor.rowcount, "record inserted.") 
     
-    def get_last_time(self,robot_name):
-        return "2020-12-15 12:57:13"
+    def post_data_dadosbosch(self):
+        pass
+    def last_line(self):
+        sql = "SELECT * FROM `wellding`  LIMIT 50"
 
-    def get_last_electrode_num(self,robot_name):
-        return 1
+        self._mycursor.execute(sql)
+        return self._mycursor.fetchall()
+    
+    def get_last_time(self,line_name,robot_name):
+        sql = "SELECT `name_robot`,`line`,`time` FROM `wellding` WHERE `line` = %s AND `name_robot` = %s ORDER BY `time` DESC LIMIT 1"
+        val = (line_name, robot_name)
 
-    def get_last_milling(self,robot_name):
-        return 50
+        self._mycursor.execute(sql,val)
+        result = self._mycursor.fetchall()
 
-    def get_last_point_applied(self):
-        return
+        if len(result) == 0:
+            return  '2000-01-01 00:00:00'#default time
+        else:
+            return str(result[0][2])
 
-    def revemove_line_in_SQL(self):
-        return
+    def get_last_electrode_num(self,line_name: str,robot_name: str, tool: int):
+        sql = "SELECT `name_robot`,`line`,`time`,`electrode_num`,`tool` FROM `wellding` WHERE `line` = %s AND `name_robot` = %s  AND `tool` = %s ORDER BY `time` DESC LIMIT 1"
+        val = (line_name, robot_name, tool)
+
+        self._mycursor.execute(sql,val)
+        result = self._mycursor.fetchall()
+
+        if len(result) == 0:
+            return  0 #electrode default
+        else:
+            return result[0][3]
+
+    def get_last_milling(self,line_name,robot_name):
+        sql = "SELECT `name_robot`,`line`,`time`,`n_millins` FROM `wellding` WHERE `line` = %s AND `name_robot` = %s ORDER BY `time` DESC LIMIT 1"
+        val = (line_name, robot_name)
+        self._mycursor.execute(sql,val)
+
+        result = self._mycursor.fetchall()
+
+        if len(result) == 0:
+            return  0 #milling default
+        else:
+            return result[0][3]
+
+
+# mb = sql_manipulation()
+# print(mb.last_line())
