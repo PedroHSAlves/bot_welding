@@ -1,6 +1,9 @@
 import os
+import shutil
+from pathlib import Path
 #ROOT_FILE = r'D:\Perfil'
 ROOT_FILE = r'W:'#Teste root
+DESTINATION_FOLDER = r'C:\Users\sc29697\Documents\UOF_PCM13'
 
 # csv_current_value_protocol = r'W:\Respot1OP005\Protocolo valores de corrente16_12_2022_08_25_55.txt'
 # line_name = r'Respot 1'
@@ -16,13 +19,33 @@ class path_manipulation():
 
         for pc in self._pcs_list_dir:
             file_name = os.listdir(f'{ROOT_FILE}\{pc}')
-            self._list_paths.append(f'{ROOT_FILE}\{pc}\{file_name}')
+            if len(file_name) != 0:
+                for file in file_name:
+                    self._list_paths.append(ROOT_FILE + "\\" + pc + "\\" + file)
 
     def file_path(self,index):
         """
         Returns the address of the csv file.
         """
         return self._list_paths[index]
+    
+    def move_file(self, index):
+        path = self._list_paths[index]
+        folder_name = path[3:path.find('PC')+3]
+        file_name =  path[path.find(folder_name)+len(folder_name)+1:]
+        
+        try:
+            Path(path).rename(f'{DESTINATION_FOLDER}\{folder_name}\{file_name}')
+            #shutil.move(path, f'{DESTINATION_FOLDER}\{folder_name}\{file_name}')
+        except:
+            raise TypeError("Error when moving the directory file")
+
+    def get_line_name(self,index):
+        """
+        Return the name of the production line
+        """
+        path = self._list_paths[index]
+        return path[3:path.find('PC')]
 
     @property
     def len_paths(self):
@@ -37,9 +60,4 @@ class path_manipulation():
         """
         return len(self._pcs_list_dir)
         
-    def get_line_name(self,index):
-        """
-        Return the name of the production line
-        """
-        return self._pcs_list_dir[index]
     

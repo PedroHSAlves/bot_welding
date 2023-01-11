@@ -13,20 +13,21 @@ class electrode_count():
         self._path = path_manipulation()
         self._sql = sql_manipulation()
 
-        for pc in self._path.len_pcs:
-            self._line_name = self._path.get_line_name(pc)
-            for path in self._path.len_paths:           
-                try:
-                    self._df = pd.read_csv(self._path.file_path(path), quoting=csv.QUOTE_NONE, sep = ";")
-                except:
-                    TypeError("CSV reading failed")
+        for path_index in range(self._path.len_paths):
+            self._line_name = self._path.get_line_name(path_index)
 
-                self.__data_formatting()
-                self._filtered_df = self._df
+            try:
+                self._df = pd.read_csv(self._path.file_path(path_index), quoting=csv.QUOTE_NONE, sep = ";")
+            except:
+                TypeError("CSV reading failed")
 
-                self._list_name = self._df['timerName'].unique()
+            self.__data_formatting()
+            self._filtered_df = self._df
 
-                self.__main()        
+            self._list_name = self._df['timerName'].unique()
+
+            #self.__main()
+            self._path.move_file(path_index)        
 
     def __data_formatting(self):
         """
@@ -39,38 +40,53 @@ class electrode_count():
         """
         """
         for robot_name in self._list_name:
-            self._last_date = self._sql.get_last_time(self._line_name,robot_name)
-            self._last_milling_SQL = self._sql.get_last_milling(self._line_name,robot_name)
-            
-            #filters
-            df_mask_date = self._df['dateTime'] > self._last_date
-            positions_date = np.flatnonzero(df_mask_date)
-            self._filtered_df = self._df.iloc[positions_date]
+            for tool in self.__get_electrode_no(robot_name):
+                self._tool_name = f"{self._line_name}_{robot_name}_{tool}"
+                self._last_date = self._sql.get_last_time(self._line_name,self._tool_name)
+                self._last_milling_SQL = self._sql.get_last_milling(self._line_name,self._tool_name)
+                
+                #filters
+                df_mask_date = self._df['dateTime'] > self._last_date
+                positions_date = np.flatnonzero(df_mask_date)
+                self._filtered_df = self._df.iloc[positions_date]
 
-            df_mask_names = self._filtered_df['timerName'] == robot_name
-            positions_names = np.flatnonzero(df_mask_names)
-            self._filtered_df = self._filtered_df.iloc[positions_names]
+                df_mask_names = self._filtered_df['timerName'] == robot_name
+                positions_names = np.flatnonzero(df_mask_names)
+                self._filtered_df = self._filtered_df.iloc[positions_names]
 
-            self.__check_electrode_change(robot_name)
+                df_mask_names = self._filtered_df['electrodeNo'] == tool
+                positions_names = np.flatnonzero(df_mask_names)
+                self._filtered_df = self._filtered_df.iloc[positions_names]
 
-    def __get_last_electrode(self, tools,robot_name):
+                self.__check_electrode_change(robot_name,tool)
+
+    def __get_electrode_no(self,robot_name):
         """
         """
-        _last_electrode_num = []
-        for tool in tools:
-            _last_electrode_num.append(self._sql.get_last_electrode_num(self._line_name,robot_name,int(tool)))
-        return _last_electrode_num
+        df_mask_date = self._df['timerName'] == robot_name
+        positions_date = np.flatnonzero(df_mask_date)
+        aux_df = self._df.iloc[positions_date]
+
+        return aux_df['electrodeNo'].unique()
+
+    def __get_last_electrode(self, tool,robot_name):
+        """
+        Gets the last electrode number of the tool, recorded in the database.
+        """
+        return  self._sql.get_last_electrode_num(self._line_name,robot_name,int(tool))
     
-    def __check_electrode_change(self, robot_name):
+    def __check_electrode_change(self, robot_name, tool):
         """
         """
-        electrode_no = self._filtered_df['electrodeNo'].unique()
-        len_electrode_no = len(electrode_no)
+        electrode_no = tool
         list_index = self._filtered_df.index
         len_index = len(list_index)
         count = 1 
-        points_applied = [0] * len_electrode_no
-        n_milling = [0] * len_electrode_no
+        points_applied = 0
+        n_milling = 0
+        
+        print("\nRobot name: ", robot_name)
+        print("Tool: ", tool)
         
         self._last_electrode_num = self.__get_last_electrode(electrode_no,robot_name)
 
@@ -80,43 +96,33 @@ class electrode_count():
                 break
             count += 1
 
-
-            electrode_no_index = np.where(electrode_no == self._filtered_df['electrodeNo'][self._filtered_df.index[index]])[0][0]
-
-            
-            #Check if you changed the clamp
-            if self._filtered_df['electrodeNo'][self._filtered_df.index[index]] != self._filtered_df['electrodeNo'][self._filtered_df.index[index + 1]]:
-                points_applied[electrode_no_index] += 1
-                n_milling[electrode_no_index] = self._filtered_df['tipDressCounter'][list_index[index]]
-
-                aux_index = np.where(electrode_no == self._filtered_df['electrodeNo'][self._filtered_df.index[index + 1]])[0][0]
-                if n_milling[aux_index] > self._filtered_df['tipDressCounter'][list_index[index + 1]] and points_applied[aux_index] != 0:
-                        points_applied[aux_index] += 1
-                        self._last_electrode_num[aux_index] += 1
-                        time = self._filtered_df['dateTime'][list_index[index]]
-                        time = time[:19]
-
-                        if self._last_date != time[:19]:
-                            self._sql.post_data_wellding(self._line_name,self._last_electrode_num[aux_index],robot_name,points_applied[aux_index], int(n_milling[aux_index]),int(electrode_no[aux_index]),time)
-
-                        points_applied[aux_index] = 0
-                
-            
-            #Checks that you have applied a point
-            elif self._filtered_df['tipDressCounter'][list_index[index]] <= self._filtered_df['tipDressCounter'][list_index[index + 1]]:
-                points_applied[electrode_no_index] += 1
-
-            else:
-                n_milling[electrode_no_index] = self._filtered_df['tipDressCounter'][list_index[index]]
-                points_applied[electrode_no_index] += 1
-                self._last_electrode_num[electrode_no_index] += 1
-                time = str(self._filtered_df['dateTime'][list_index[index]])
+            if n_milling > self._filtered_df['tipDressCounter'][list_index[index + 1]] and points_applied != 0:
+                points_applied += 1
+                self._last_electrode_num += 1
+                time = self._filtered_df['dateTime'][list_index[index]]
                 time = time[:19]
 
-                if self._last_date != time:
-                    self._sql.post_data(self._line_name,self._last_electrode_num[electrode_no_index],robot_name,points_applied[electrode_no_index],int(n_milling[electrode_no_index]),int(electrode_no[electrode_no_index]),time)
+                if self._last_date != time[:19]:
+                    self._sql.post_data_wellding(self._line_name,self._last_electrode_num,robot_name,points_applied, n_milling,int(tool),self._tool_name,time)
 
-                points_applied[electrode_no_index] = 0
+                points_applied = 0
+             
+            #Checks that you have applied a point
+            else:
+                n_milling = int(self._filtered_df['tipDressCounter'][list_index[index + 1]]) 
+                points_applied += 1
+
+            # else:
+            #     n_milling = self._filtered_df['tipDressCounter'][list_index[index]]
+            #     points_applied += 1
+            #     self._last_electrode_num += 1
+            #     time = str(self._filtered_df['dateTime'][list_index[index]])
+            #     time = time[:19]
+
+            #     if self._last_date != time:
+            #         self._sql.post_data(self._line_name,self._last_electrode_num[electrode_no_index],robot_name,points_applied[electrode_no_index],int(n_milling[electrode_no_index]),int(electrode_no[electrode_no_index]),time)
+
+            #     points_applied[electrode_no_index] = 0
 
 
 
