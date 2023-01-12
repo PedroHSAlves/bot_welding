@@ -29,13 +29,18 @@ class sql_manipulation():
     
     def post_data_dadosbosch(self):
         pass
-    def last_line(self):
-        sql = "SELECT * FROM `wellding`  LIMIT 50"
-
-        self._mycursor.execute(sql)
-        return self._mycursor.fetchall()
     
-    def get_last_time(self,line_name,tool_name):
+    # def last_line(self):
+
+    #     sql = "SELECT * FROM `wellding`  LIMIT 50"
+
+    #     self._mycursor.execute(sql)
+    #     return self._mycursor.fetchall()
+    
+    def get_last_time(self,line_name: str,tool_name: str):
+        """
+        Get the last delta time recorded in the database.
+        """
         sql = "SELECT `tool_name`,`line`,`time` FROM `wellding` WHERE `line` = %s AND `tool_name` = %s ORDER BY `time` DESC LIMIT 1"
         val = (line_name, tool_name)
 
@@ -49,6 +54,7 @@ class sql_manipulation():
 
     def get_last_electrode_num(self,line_name: str,robot_name: str, tool: int):
         """
+        Get the last registered electrode number in the database.
         """
         sql = "SELECT `name_robot`,`line`,`time`,`electrode_num`,`tool` FROM `wellding` WHERE `line` = %s AND `name_robot` = %s  AND `tool` = %s ORDER BY `time` DESC LIMIT 1"
         val = (line_name, robot_name, tool)
@@ -61,7 +67,10 @@ class sql_manipulation():
         else:
             return result[0][3]
 
-    def get_last_milling(self,line_name,tool_name):
+    def get_last_milling(self,line_name: str,tool_name: str):
+        """
+        Get the last milling number resgistered in the database.
+        """
         sql = "SELECT `tool_name`,`line`,`time`,`n_millins` FROM `wellding` WHERE `line` = %s AND `tool_name` = %s ORDER BY `time` DESC LIMIT 1"
         val = (line_name, tool_name)
         self._mycursor.execute(sql,val)
@@ -72,7 +81,3 @@ class sql_manipulation():
             return  0 #milling default
         else:
             return result[0][3]
-
-
-# mb = sql_manipulation()
-# print(mb.last_line())

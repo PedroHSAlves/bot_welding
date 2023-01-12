@@ -4,12 +4,10 @@ from paths import path_manipulation
 import csv
 from SQL_manipulation import sql_manipulation
 
+import time
+
 class electrode_count():
     def __init__(self):
-        """
-        Constructor method
-        
-        """
         self._path = path_manipulation()
         self._sql = sql_manipulation()
 
@@ -26,7 +24,7 @@ class electrode_count():
 
             self._list_name = self._df['timerName'].unique()
 
-            #self.__main()
+            self.__main()
             self._path.move_file(path_index)        
 
     def __data_formatting(self):
@@ -38,6 +36,7 @@ class electrode_count():
     
     def __main(self):
         """
+        Applies the filter for each existing robot in the CSV file.
         """
         for robot_name in self._list_name:
             for tool in self.__get_electrode_no(robot_name):
@@ -60,8 +59,9 @@ class electrode_count():
 
                 self.__check_electrode_change(robot_name,tool)
 
-    def __get_electrode_no(self,robot_name):
+    def __get_electrode_no(self,robot_name: str):
         """
+        Get all tools from the robot.
         """
         df_mask_date = self._df['timerName'] == robot_name
         positions_date = np.flatnonzero(df_mask_date)
@@ -69,14 +69,15 @@ class electrode_count():
 
         return aux_df['electrodeNo'].unique()
 
-    def __get_last_electrode(self, tool,robot_name):
+    def __get_last_electrode(self, tool,robot_name:str):
         """
         Gets the last electrode number of the tool, recorded in the database.
         """
         return  self._sql.get_last_electrode_num(self._line_name,robot_name,int(tool))
     
-    def __check_electrode_change(self, robot_name, tool):
+    def __check_electrode_change(self, robot_name: str, tool):
         """
+        Counts how many weld spots have benn applied in each milling oporation.
         """
         electrode_no = tool
         list_index = self._filtered_df.index
@@ -85,8 +86,10 @@ class electrode_count():
         points_applied = 0
         n_milling = 0
         
-        print("\nRobot name: ", robot_name)
-        print("Tool: ", tool)
+        ### DEBUG AREA
+        # print("\nLine name: ",self._line_name)
+        # print("Robot name: ", robot_name)
+        # print("Tool: ", tool)
         
         self._last_electrode_num = self.__get_last_electrode(electrode_no,robot_name)
 
@@ -106,26 +109,13 @@ class electrode_count():
                     self._sql.post_data_wellding(self._line_name,self._last_electrode_num,robot_name,points_applied, n_milling,int(tool),self._tool_name,time)
 
                 points_applied = 0
-             
-            #Checks that you have applied a point
             else:
                 n_milling = int(self._filtered_df['tipDressCounter'][list_index[index + 1]]) 
                 points_applied += 1
 
-            # else:
-            #     n_milling = self._filtered_df['tipDressCounter'][list_index[index]]
-            #     points_applied += 1
-            #     self._last_electrode_num += 1
-            #     time = str(self._filtered_df['dateTime'][list_index[index]])
-            #     time = time[:19]
-
-            #     if self._last_date != time:
-            #         self._sql.post_data(self._line_name,self._last_electrode_num[electrode_no_index],robot_name,points_applied[electrode_no_index],int(n_milling[electrode_no_index]),int(electrode_no[electrode_no_index]),time)
-
-            #     points_applied[electrode_no_index] = 0
 
 
-
+print("running program...")#Debug print
 wellding = electrode_count()
-print("End code")#Debug print
+print("end code")#Debug print
         

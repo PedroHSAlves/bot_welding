@@ -10,10 +10,6 @@ DESTINATION_FOLDER = r'C:\Users\sc29697\Documents\UOF_PCM13'
 
 class path_manipulation():
     def __init__(self):
-        """
-        Constructor method
-        Creates an object to manipulate the files
-        """
         self._pcs_list_dir = os.listdir(path=ROOT_FILE)
         self._list_paths = []
 
@@ -23,24 +19,25 @@ class path_manipulation():
                 for file in file_name:
                     self._list_paths.append(ROOT_FILE + "\\" + pc + "\\" + file)
 
-    def file_path(self,index):
+    def file_path(self,index:int):
         """
         Returns the address of the csv file.
         """
         return self._list_paths[index]
     
-    def move_file(self, index):
+    def move_file(self, index:int):
+        """
+        Relocates already used files.
+        """
         path = self._list_paths[index]
         folder_name = path[3:path.find('PC')+3]
-        file_name =  path[path.find(folder_name)+len(folder_name)+1:]
         
         try:
-            Path(path).rename(f'{DESTINATION_FOLDER}\{folder_name}\{file_name}')
-            #shutil.move(path, f'{DESTINATION_FOLDER}\{folder_name}\{file_name}')
+            shutil.move(path, f'{DESTINATION_FOLDER}\{folder_name}')
         except:
             raise TypeError("Error when moving the directory file")
 
-    def get_line_name(self,index):
+    def get_line_name(self,index:int):
         """
         Return the name of the production line
         """
