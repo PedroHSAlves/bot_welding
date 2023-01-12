@@ -1,10 +1,9 @@
 import pandas as pd
 import numpy as np
-from paths import path_manipulation
 import csv
+from paths import path_manipulation
 from SQL_manipulation import sql_manipulation
 
-import time
 
 class electrode_count():
     def __init__(self):
@@ -113,9 +112,4 @@ class electrode_count():
                 n_milling = int(self._filtered_df['tipDressCounter'][list_index[index + 1]]) 
                 points_applied += 1
 
-
-
-print("running program...")#Debug print
-wellding = electrode_count()
-print("end code")#Debug print
         

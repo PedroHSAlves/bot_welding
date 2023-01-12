@@ -26,17 +26,13 @@ class sql_manipulation():
 
         self._mydb.commit()
         print(self._mycursor.rowcount, "record inserted.") 
-    
+
+    def post_data_psq(self):
+        pass
+
     def post_data_dadosbosch(self):
         pass
-    
-    # def last_line(self):
-
-    #     sql = "SELECT * FROM `wellding`  LIMIT 50"
-
-    #     self._mycursor.execute(sql)
-    #     return self._mycursor.fetchall()
-    
+       
     def get_last_time(self,line_name: str,tool_name: str):
         """
         Get the last delta time recorded in the database.
@@ -81,3 +77,50 @@ class sql_manipulation():
             return  0 #milling default
         else:
             return result[0][3]
+    
+    def get_num_points_psq(self, line_name: str, robot_name: str):
+        """
+        gets the value of the number of points applied, if the robot already exists in the database.
+        """
+        sql = "SELECT `line`,`timer_name`,`number_points` FROM `psq` WHERE `line` = %s AND `timer_name` = %s"
+        val = (line_name, robot_name)
+        self._mycursor.execute(sql,val)
+        
+        result = self._mycursor.fetchall()
+
+        if len(result) == 0:
+            return  0 
+        else:
+            return result[0][2]
+    
+    def get_num_points_psq_off(self, line_name: str, robot_name: str):
+        """
+        gets the value of the number of points applied with psq disabled, if the robot already exists in the database.
+        """
+        sql = "SELECT `line`,`timer_name`,`num_points_psq_off` FROM `psq` WHERE `line` = %s AND `timer_name` = %s"
+        val = (line_name, robot_name)
+        self._mycursor.execute(sql,val)
+        
+        result = self._mycursor.fetchall()
+
+        if len(result) == 0:
+            return  0 
+        else:
+            return result[0][2]
+
+    def get_last_update_psq(self, line_name: str, robot_name: str):
+        """
+        get the last time of the last applied weld spot counted (last_update)
+        """
+        sql = "SELECT `line`,`timer_name`,`last_update` FROM `psq` WHERE `line` = %s AND `timer_name` = %s"
+        val = (line_name, robot_name)
+        self._mycursor.execute(sql,val)
+        
+        result = self._mycursor.fetchall()
+
+        if len(result) == 0:
+            return  '2000-01-01 00:00:00'#default time
+        else:
+            return str(result[0][2])
+
+

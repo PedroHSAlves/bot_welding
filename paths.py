@@ -2,6 +2,9 @@ import os
 import shutil
 from pathlib import Path
 #ROOT_FILE = r'D:\Perfil'
+#DESTINATION_FOLDER = r'D:\Perfil2'
+
+#Test Variables
 ROOT_FILE = r'W:'#Teste root
 DESTINATION_FOLDER = r'C:\Users\sc29697\Documents\UOF_PCM13'
 
