@@ -1,6 +1,6 @@
 import os
 import shutil
-from pathlib import Path
+
 #ROOT_FILE = r'D:\Perfil'
 #DESTINATION_FOLDER = r'D:\Perfil2'
 

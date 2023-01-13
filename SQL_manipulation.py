@@ -25,11 +25,38 @@ class sql_manipulation():
         self._mycursor.execute(sql,val)
 
         self._mydb.commit()
-        print(self._mycursor.rowcount, "record inserted.") 
+        print(self._mycursor.rowcount, "record inserted in wellding db.") 
 
-    def post_data_psq(self):
-        pass
+    def post_data_psq(self,line_name: str, robot_name: str, status_psq: int, number_points: int, num_points_psq_off: int, last_update):
+        """
+        Realizes a data commit to the psq database.
+        """
+        
+        self.del_data_psq(line_name,robot_name)
 
+        sql = "INSERT INTO psq (line,tool_name, status_psq, number_points, num_points_psq_off, last_update) VALUES (%s,%s,%s,%s,%s,%s)"
+        val = (line_name,robot_name, status_psq, number_points, num_points_psq_off, last_update)  
+        self._mycursor.execute(sql,val)
+
+        self._mydb.commit()
+        print(self._mycursor.rowcount, "record inserted in psq db.") 
+
+    def del_data_psq(self, line_name: str, robot_name: str):
+        """
+        Deletes a data from the psq database.
+        """
+        sql = "SELECT `line`,`tool_name`,`id` FROM `psq` WHERE `line` = %s AND `tool_name` = %s"
+        val = (line_name, robot_name)
+        self._mycursor.execute(sql,val)
+        
+        result = self._mycursor.fetchall()
+
+        if len(result) != 0:
+            sql = f"DELETE FROM `psq` WHERE `psq`.`id` = {result[0][2]}"
+            self._mycursor.execute(sql)
+
+            self._mydb.commit()
+            
     def post_data_dadosbosch(self):
         pass
        
@@ -82,7 +109,7 @@ class sql_manipulation():
         """
         gets the value of the number of points applied, if the robot already exists in the database.
         """
-        sql = "SELECT `line`,`timer_name`,`number_points` FROM `psq` WHERE `line` = %s AND `timer_name` = %s"
+        sql = "SELECT `line`,`tool_name`,`number_points` FROM `psq` WHERE `line` = %s AND `tool_name` = %s"
         val = (line_name, robot_name)
         self._mycursor.execute(sql,val)
         
@@ -97,7 +124,7 @@ class sql_manipulation():
         """
         gets the value of the number of points applied with psq disabled, if the robot already exists in the database.
         """
-        sql = "SELECT `line`,`timer_name`,`num_points_psq_off` FROM `psq` WHERE `line` = %s AND `timer_name` = %s"
+        sql = "SELECT `line`,`tool_name`,`num_points_psq_off` FROM `psq` WHERE `line` = %s AND `tool_name` = %s"
         val = (line_name, robot_name)
         self._mycursor.execute(sql,val)
         
@@ -112,7 +139,7 @@ class sql_manipulation():
         """
         get the last time of the last applied weld spot counted (last_update)
         """
-        sql = "SELECT `line`,`timer_name`,`last_update` FROM `psq` WHERE `line` = %s AND `timer_name` = %s"
+        sql = "SELECT `line`,`tool_name`,`last_update` FROM `psq` WHERE `line` = %s AND `tool_name` = %s"
         val = (line_name, robot_name)
         self._mycursor.execute(sql,val)
         
@@ -122,5 +149,3 @@ class sql_manipulation():
             return  '2000-01-01 00:00:00'#default time
         else:
             return str(result[0][2])
-
-
