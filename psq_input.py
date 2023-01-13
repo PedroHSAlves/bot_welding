@@ -30,7 +30,7 @@ class psq_count():
         add a column in the dataframe, with the PSQ status calculations.
         """
         is_true = lambda x:int(x==1)
-        psq = lambda row: is_true(row['uirMeasuringActive']) + is_true(row['uirRegulationActive']) + is_true(row['uirRegulationActive'])
+        psq = lambda row: is_true(row['uirMeasuringActive']) + is_true(row['uirRegulationActive']) + is_true(row['uirMonitoringActive'])
 
         self._df['psq'] = self._df.apply(psq,axis=1)
     
