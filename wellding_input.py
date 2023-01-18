@@ -12,19 +12,21 @@ class electrode_count():
 
         for path_index in range(self._path.len_paths):
             self._line_name = self._path.get_line_name(path_index)
+            file_path = self._path.file_path(path_index)
 
-            try:
-                self._df = pd.read_csv(self._path.file_path(path_index), quoting=csv.QUOTE_NONE, sep = ";")
-            except:
-                TypeError("CSV reading failed")
+            if 'Protocolo valores de corrente' in file_path:
+                try:
+                    self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";")
+                except:
+                    TypeError("CSV reading failed")
 
-            self.__data_formatting()
-            self._filtered_df = self._df
+                self.__data_formatting()
+                self._filtered_df = self._df
 
-            self._list_name = self._df['timerName'].unique()
+                self._list_name = self._df['timerName'].unique()
 
-            self.__main()
-            self._path.move_file(path_index)        
+                self.__main()
+                self._path.move_file(path_index)        
 
     def __data_formatting(self):
         """

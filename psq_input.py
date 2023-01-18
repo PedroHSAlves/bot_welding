@@ -11,23 +11,25 @@ class psq_count():
 
         for path_index in range(self._path.len_paths):
             self._line_name = self._path.get_line_name(path_index)
+            file_path = self._path.file_path(path_index)
+            
+            if 'Protocolo valores de corrente' in file_path:
+                try:
+                    self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";")
+                except:
+                    TypeError("CSV reading failed")
 
-            try:
-                self._df = pd.read_csv(self._path.file_path(path_index), quoting=csv.QUOTE_NONE, sep = ";")
-            except:
-                TypeError("CSV reading failed")
+                self.__data_formatting()
+                self._filtered_df = self._df
 
-            self.__data_formatting()
-            self._filtered_df = self._df
+                self._list_name = self._df['timerName'].unique()
 
-            self._list_name = self._df['timerName'].unique()
-
-            self.__add_psq_column()
-            self.__main()
+                self.__add_psq_column()
+                self.__main()
     
     def __add_psq_column(self):
         """
-        add a column in the dataframe, with the PSQ status calculations.
+        Add a column in the dataframe, with the PSQ status calculations.
         """
         is_true = lambda x:int(x==1)
         psq = lambda row: is_true(row['uirMeasuringActive']) + is_true(row['uirRegulationActive']) + is_true(row['uirMonitoringActive'])
@@ -39,7 +41,7 @@ class psq_count():
         Fixes formatting of columns imported from CSV.
         """
         self._df.columns = self._df.columns.str.replace(r'"', '')
-        self._df['timerName']= self._df['timerName'].str.replace(r'"', '')
+        self._df['timerName'] = self._df['timerName'].str.replace(r'"', '')
     
     
     def __main(self):

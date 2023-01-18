@@ -32,11 +32,14 @@ class path_manipulation():
         """
         Relocates already used files.
         """
-        path = self._list_paths[index]
-        folder_name = path[3:path.find('PC')+3]
+        origin_path = self._list_paths[index]
+        folder_name = origin_path[3:origin_path.find('PC')+3]
+        destination_path = f'{DESTINATION_FOLDER}\{folder_name}'
         
         try:
-            shutil.move(path, f'{DESTINATION_FOLDER}\{folder_name}')
+            if folder_name not in os.listdir(DESTINATION_FOLDER):
+                 os.makedirs(destination_path)
+            shutil.move(origin_path, destination_path)
         except:
             raise TypeError("Error when moving the directory file")
 
