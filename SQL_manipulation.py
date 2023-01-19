@@ -41,6 +41,14 @@ class sql_manipulation():
         self._mydb.commit()
         print(self._mycursor.rowcount, "record inserted in psq db.") 
 
+    def post_data_dadosbosch(self, sql, val):
+        """
+        """
+        self._mycursor.execute(sql,val)
+        self._mydb.commit()
+        print(self._mycursor.rowcount, "record inserted in dadosbosch db.")
+
+
     def del_data_psq(self, line_name: str, robot_name: str):
         """
         Deletes a data from the psq database.
@@ -57,10 +65,8 @@ class sql_manipulation():
 
             self._mydb.commit()
             
-    def post_data_dadosbosch(self):
-        pass
        
-    def get_last_time(self,line_name: str,tool_name: str):
+    def get_last_time_wellding(self,line_name: str,tool_name: str):
         """
         Get the last delta time recorded in the database.
         """
@@ -143,6 +149,21 @@ class sql_manipulation():
         val = (line_name, robot_name)
         self._mycursor.execute(sql,val)
         
+        result = self._mycursor.fetchall()
+
+        if len(result) == 0:
+            return  '2000-01-01 00:00:00'#default time
+        else:
+            return str(result[0][2])
+
+    def get_last_time_dadosbosch(self,line_name: str,tool_name: str):
+        """
+        Get the last delta time recorded in the database.
+        """
+        sql = "SELECT `tool_name`,`line`,`date_time` FROM `dadosbosch` WHERE `line` = %s AND `tool_name` = %s ORDER BY `date_time` DESC LIMIT 1"
+        val = (line_name, tool_name)
+
+        self._mycursor.execute(sql,val)
         result = self._mycursor.fetchall()
 
         if len(result) == 0:

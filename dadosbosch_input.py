@@ -58,17 +58,107 @@ class dadosbosch_update():
     def __post_data(self):
         """
         """
-        sql_column_name = 'prot_record_id,tool_name,line,station,model,status_psq,date_time,timer_name,prog_no,flag_224,spot_name,wear,wear_per_cent,monitor_state,monitor_state_txt,measure_state,regulation_std,i_demand_1,i_actual_1,	regulation_1,i_demand_2,i_actual_2,regulation_2,i_demand_3,i_actual_3,regulation_3,pha_std,pha_1,pha_2,pha_3,t_i_demand_std,t_actual_std,tip_dress_counter,electrode_no,voltage_actual_value,voltage_ref_value,currentActualValue,current_reference_value,weld_time_actual_value,weld_time_ref_value,energy_actual_value,energy_ref_value,power_actual_value,power_ref_value,resistance_actual_value,resistance_ref_value,pulse_width_actual_value,	pulse_width__ref_value,	stabilisation_factor_act_value,	stabilisation_factor_ref_value,uip_actual_value,uip_ref_value,uir_expulsion_time,uir_measuring_active,uir_regulation_active,uir_monitoring_active,uir_weld_time_prolongation_active' 
+        query = 'INSERT INTO dadosbosch (prot_record_id,tool_name,line,station,model,status_psq,date_time,timer_name,prog_no,flag_224,spot_name,wear,wear_per_cent,monitor_state,monitor_state_txt,measure_state,regulation_std,i_demand_1,i_actual_1,	regulation_1,i_demand_2,i_actual_2,regulation_2,i_demand_3,i_actual_3,regulation_3,pha_std,pha_1,pha_2,pha_3,t_i_demand_std,t_actual_std,tip_dress_counter,electrode_no,voltage_actual_value,voltage_ref_value,currentActualValue,current_reference_value,weld_time_actual_value,weld_time_ref_value,energy_actual_value,energy_ref_value,power_actual_value,power_ref_value,resistance_actual_value,resistance_ref_value,pulse_width_actual_value,	pulse_width__ref_value,	stabilisation_factor_act_value,	stabilisation_factor_ref_value,uip_actual_value,uip_ref_value,uir_expulsion_time,uir_measuring_active,uir_regulation_active,uir_monitoring_active,uir_weld_time_prolongation_active) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)' 
         val = []
 
         for robot_name in self._list_name:
-            tool_name = f'{self._line_name}_{robot_name}'
-            for index in range(len(self._filtered_df['protRecord_ID'])):
-                val.append(self._filtered_df['protRecord_ID'][index])
-                val.append(self._filtered_df['protRecord_ID'][index])
-                val.append(self._filtered_df['protRecord_ID'][index])
-                val.append(self._filtered_df['protRecord_ID'][index])
-                val.append(self._filtered_df['protRecord_ID'][index])
-                val.append(self._filtered_df['protRecord_ID'][index])
-                val.append(self._filtered_df['protRecord_ID'][index])
-                val.append(self._filtered_df['protRecord_ID'][index])
+            for tool in self.__get_electrode_no(robot_name):
+                tool_name = f'{self._line_name}_{robot_name}_{tool}'
+
+                self.__filter_df(robot_name,tool,tool_name)
+                list_index = self._filtered_df.index
+
+                for index in range(len(list_index)):
+                    val.clear()
+
+                    model = 'n/a'
+
+                    val.append(int(self._filtered_df['protRecord_ID'][list_index[index]]))
+                    val.append(tool_name)
+                    val.append(self._line_name)
+                    val.append(self._filtered_df['timerName'][list_index[index]][3:-3])
+                    val.append(model)
+                    val.append(int(self._filtered_df['psq'][list_index[index]]))
+                    val.append(self._filtered_df['dateTime'][list_index[index]])
+                    val.append(self._filtered_df['timerName'][list_index[index]])
+                    val.append(int(self._filtered_df['progNo'][list_index[index]]))
+                    val.append(int(self._filtered_df['flag_224'][list_index[index]]))
+                    val.append(self._filtered_df['spotName'][list_index[index]])
+                    val.append(int(self._filtered_df['wear'][list_index[index]]))
+                    val.append(int(self._filtered_df['wearPerCent'][list_index[index]]))
+                    val.append(int(self._filtered_df['monitorState'][list_index[index]]))
+                    val.append(self._filtered_df['monitorState_txt'][list_index[index]][1:-1])
+                    val.append(int(self._filtered_df['measureState'][list_index[index]]))
+                    val.append(int(self._filtered_df['regulationStd'][list_index[index]]))
+                    val.append(int(self._filtered_df['iDemand1'][list_index[index]]))
+                    val.append(int(self._filtered_df['iActual1'][list_index[index]]))
+                    val.append(int(self._filtered_df['regulation1'][list_index[index]]))
+                    val.append(int(self._filtered_df['iDemand2'][list_index[index]]))
+                    val.append(int(self._filtered_df['iActual2'][list_index[index]]))
+                    val.append(int(self._filtered_df['regulation2'][list_index[index]]))
+                    val.append(int(self._filtered_df['iDemand3'][list_index[index]]))
+                    val.append(int(self._filtered_df['iActual3'][list_index[index]]))
+                    val.append(int(self._filtered_df['regulation3'][list_index[index]]))
+                    val.append(int(self._filtered_df['phaStd'][list_index[index]]))
+                    val.append(int(self._filtered_df['pha1'][list_index[index]]))
+                    val.append(int(self._filtered_df['pha2'][list_index[index]]))
+                    val.append(int(self._filtered_df['pha3'][list_index[index]]))
+                    val.append(int(self._filtered_df['t_iDemandStd'][list_index[index]]))
+                    val.append(int(self._filtered_df['tActualStd'][list_index[index]]))
+                    val.append(int(self._filtered_df['tipDressCounter'][list_index[index]]))
+                    val.append(int(self._filtered_df['electrodeNo'][list_index[index]]))
+                    val.append(int(self._filtered_df['voltageActualValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['voltageRefValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['currentActualValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['currentReferenceValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['weldTimeActualValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['weldTimeRefValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['energyActualValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['energyRefValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['powerActualValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['powerRefValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['resistanceActualValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['resistanceRefValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['pulseWidthActualValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['pulseWidthRefValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['stabilisationFactorActValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['stabilisationFactorRefValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['uipActualValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['uipRefValue'][list_index[index]]))
+                    val.append(int(self._filtered_df['uirExpulsionTime'][list_index[index]]))
+                    val.append(int(self._filtered_df['uirMeasuringActive'][list_index[index]]))
+                    val.append(int(self._filtered_df['uirRegulationActive'][list_index[index]]))
+                    val.append(int(self._filtered_df['uirMonitoringActive'][list_index[index]]))
+                    val.append(int(self._filtered_df['uirWeldTimeProlongationActive'][list_index[index]]))
+
+                    self._sql.post_data_dadosbosch(query,val)
+
+
+    def __filter_df(self,robot_name: str, tool: int, tool_name: str):
+        """
+        Filters the dataframe by robot_name, tool, time.
+        """
+        _last_date = self._sql.get_last_time_dadosbosch(self._line_name,tool_name)
+
+        df_mask_date = self._df['dateTime'] > _last_date
+        positions_date = np.flatnonzero(df_mask_date)
+        self._filtered_df = self._df.iloc[positions_date]
+
+        df_mask_names = self._filtered_df['timerName'] == robot_name
+        positions_names = np.flatnonzero(df_mask_names)
+        self._filtered_df = self._filtered_df.iloc[positions_names]
+
+        df_mask_names = self._filtered_df['electrodeNo'] == tool
+        positions_names = np.flatnonzero(df_mask_names)
+        self._filtered_df = self._filtered_df.iloc[positions_names]
+
+
+    def __get_electrode_no(self, robot_name: str):
+        """
+        Get all tools from the robot_name.
+        """
+        df_mask_date = self._df['timerName'] == robot_name
+        positions_date = np.flatnonzero(df_mask_date)
+        aux_df = self._df.iloc[positions_date]
+
+        return aux_df['electrodeNo'].unique()

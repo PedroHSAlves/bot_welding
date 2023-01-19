@@ -42,7 +42,7 @@ class electrode_count():
         for robot_name in self._list_name:
             for tool in self.__get_electrode_no(robot_name):
                 self._tool_name = f"{self._line_name}_{robot_name}_{tool}"
-                self._last_date = self._sql.get_last_time(self._line_name,self._tool_name)
+                self._last_date = self._sql.get_last_time_wellding(self._line_name,self._tool_name)
                 self._last_milling_SQL = self._sql.get_last_milling(self._line_name,self._tool_name)
                 
                 #filters
