@@ -5,7 +5,7 @@ from paths import path_manipulation
 from SQL_manipulation import sql_manipulation
 
 
-class electrode_count():
+class electrode_update():
     def __init__(self):
         self._path = path_manipulation()
         self._sql = sql_manipulation()
@@ -33,7 +33,7 @@ class electrode_count():
         Fixes formatting of columns imported from CSV.
         """
         self._df.columns = self._df.columns.str.replace(r'"', '')
-        self._df['timerName']= self._df['timerName'].str.replace(r'"', '')
+        self._df['timerName'] = self._df['timerName'].str.replace(r'"', '')
     
     def __main(self):
         """

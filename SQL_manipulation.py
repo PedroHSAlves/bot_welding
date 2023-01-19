@@ -43,11 +43,21 @@ class sql_manipulation():
 
     def post_data_dadosbosch(self, sql, val):
         """
+        Realizes a data commit to the dadosbosch database.
         """
         self._mycursor.execute(sql,val)
         self._mydb.commit()
         print(self._mycursor.rowcount, "record inserted in dadosbosch db.")
+    
+    def post_data_alarms(self,val):
+        """
+        Realizes a data commit to the alarms database.
+        """
+        sql = "INSERT INTO alarms (prot_record_id,date_time,timer_name,error_code_1,error_code_1_txt,code_2_interpret,error_code_2,error_code_2_txt,is_error,is_error_txt) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        self._mycursor.execute(sql,val)
+        self._mydb.commit()
 
+        print(self._mycursor.rowcount, "record inserted in alarms db.")
 
     def del_data_psq(self, line_name: str, robot_name: str):
         """
@@ -170,3 +180,33 @@ class sql_manipulation():
             return  '2000-01-01 00:00:00'#default time
         else:
             return str(result[0][2])
+    
+    def get_last_time_alarms(self):
+        """
+        Get the last delta time recorded in the database.
+        """
+        sql = "SELECT `date_time` FROM `alarms` ORDER BY `date_time` DESC LIMIT 1"
+
+        self._mycursor.execute(sql)
+        result = self._mycursor.fetchall()
+
+        if len(result) == 0:
+            return  '2000-01-01 00:00:00'#default time
+        else:
+            return str(result[0][0])
+
+    def get_last_record_id_alarms(self):
+        """
+        Get the last ProtrecordId recorded in the database.
+        """
+        sql = "SELECT `date_time`,`prot_record_id` FROM `alarms` ORDER BY `date_time` DESC LIMIT 1"
+
+        self._mycursor.execute(sql)
+        result = self._mycursor.fetchall()
+
+        if len(result) == 0:
+            return  0 #default id
+        else:
+            return result[0][1]
+
+    

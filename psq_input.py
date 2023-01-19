@@ -4,7 +4,7 @@ import csv
 from paths import path_manipulation
 from SQL_manipulation import sql_manipulation
 
-class psq_count():
+class psq_update():
     def __init__(self):
         self._path = path_manipulation()
         self._sql = sql_manipulation()
