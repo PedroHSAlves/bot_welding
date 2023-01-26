@@ -59,4 +59,16 @@ This code is responsible for handling the processing of the data from the CSV fi
 
 This method is called when an instance of the class is created. It initializes the instance variable `_path` which is an instance of the class.
 
+### __add_psq_column(self)
 
+This method adds a new column to the dataframe, called 'psq', which calculates the PSQ status. It does this by applying a lambda function to each row that adds the values of the 'uirMeasuringActive', 'uirRegulationActive', and 'uirMonitoringActive' columns together, and returns 1 if the sum is equal to 3, otherwise it returns 0. 
+
+The status of the PSQ some will be considered active, when the three columns mentioned above have their values equal to 1.
+
+### __data_formatting(self)
+
+This method fixes the formatting of the columns in the dataframe by removing the double quotes from the column names and the 'timerName' column.
+
+### __main(self)
+
+This is the main method of the class, which applies filters to the dataframe for each existing robot in the CSV file. It iterates through each unique robot name in the dataframe, and for each tool of that robot, it gets the current number of points, PSQ off points, and the last update time from the SQL database. Then it applies filters to the dataframe for the robot name, tool number, and dateTime, and if the filtered dataframe is not empty, it counts the number of points and PSQ off points, gets the last PSQ status and update time from the filtered dataframe, and sends that information to the SQL database using the sql_manipulation class.
