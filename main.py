@@ -8,8 +8,8 @@ star_time = time.time()
 print("running program...")#Debug print
 
 alarms_update()
-dadosbosch_update()
 psq_update()
 electrode_update()
+dadosbosch_update()
 
 print(f"end code  {time.time() - star_time}")#Debug print

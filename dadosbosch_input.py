@@ -15,61 +15,11 @@ class dadosbosch_update():
 
             if 'Protocolo valores de corrente' in file_path:
                 try:
-                    col_types = {'"protRecord_ID"':int,
-                        '"dateTime"': str,
-                        '"timerName"':str,
-                        '"progNo"':int,
-                        '"spotName"':str,
-                        '"wear"':float,
-                        '"wearPerCent"':float,
-                        '"monitorState"':int,
-                        '"monitorState_txt"':str,
-                        '"measureState"':int,
-                        '"regulationStd"':int,
-                        '"iDemand1"':float,
-                        '"iActual1"':float,
-                        '"regulation1"':int,
-                        '"iDemand2"':float,
-                        '"iActual2"':float,
-                        '"regulation2"':int,
-                        '"iDemand3"':float,
-                        '"iActual3"':float,
-                        '"regulation3"':int,
-                        '"phaStd"':float,
-                        '"pha1"':float,
-                        '"pha2"':float,
-                        '"pha3"':float,
-                        '"t_iDemandStd"':float,
-                        '"tActualStd"':float,
-                        '"tipDressCounter"':int,
-                        '"electrodeNo"':int,
-                        '"voltageActualValue"':float,
-                        '"voltageRefValue"':float,
-                        '"currentActualValue"':float,
-                        '"currentReferenceValue"':float,
-                        '"weldTimeActualValue"':int,
-                        '"weldTimeRefValue"':int,
-                        '"energyActualValue"':float,
-                        '"energyRefValue"':float,
-                        '"powerActualValue"':float,
-                        '"powerRefValue"':float,
-                        '"resistanceActualValue"':int,
-                        '"resistanceRefValue"':int,
-                        '"pulseWidthActualValue"':float,
-                        '"pulseWidthRefValue"':float,
-                        '"stabilisationFactorActValue"':float,
-                        '"stabilisationFactorRefValue"':float,
-                        '"uipActualValue"':int,
-                        '"uipRefValue"':int,
-                        '"uirExpulsionTime"':int,
-                        '"uirMeasuringActive"':int,
-                        '"uirRegulationActive"':int,
-                        '"uirMonitoringActive"':int,
-                        '"uirWeldTimeProlongationActive"':int}
                     usecols = ['"protRecord_ID"','"dateTime"', '"timerName"', '"progNo"', '"spotName"', '"wear"', '"wearPerCent"', '"monitorState"', '"monitorState_txt"', '"measureState"', '"regulationStd"', '"iDemand1"', '"iActual1"', '"regulation1"', '"iDemand2"', '"iActual2"', '"regulation2"', '"iDemand3"', '"iActual3"', '"regulation3"', '"phaStd"', '"pha1"', '"pha2"', '"pha3"', '"t_iDemandStd"', '"tActualStd"', '"tipDressCounter"', '"electrodeNo"', '"voltageActualValue"', '"voltageRefValue"', '"currentActualValue"', '"currentReferenceValue"', '"weldTimeActualValue"', '"weldTimeRefValue"', '"energyActualValue"', '"energyRefValue"', '"powerActualValue"', '"powerRefValue"', '"resistanceActualValue"', '"resistanceRefValue"', '"pulseWidthActualValue"', '"pulseWidthRefValue"', '"stabilisationFactorActValue"', '"stabilisationFactorRefValue"', '"uipActualValue"', '"uipRefValue"', '"uirExpulsionTime"', '"uirMeasuringActive"', '"uirRegulationActive"', '"uirMonitoringActive"', '"uirWeldTimeProlongationActive"']
-                    self._df = pd.read_csv(file_path, quoting= csv.QUOTE_NONE, sep = ";", usecols = usecols, dtype = col_types)
+                    self._df = pd.read_csv(file_path, quoting= csv.QUOTE_NONE, sep = ";", usecols = usecols, keep_default_na = False)
+                    self._df.dropna()
                 except Exception as e:
-                   raise TypeError(f"CSV reading failed, {e}")
+                   raise TypeError(f"CSV reading failed. file Name {file_path}. {e}")
                 
                 self.__data_formatting()
                 self._list_name = self._df['timerName'].unique()
@@ -79,6 +29,7 @@ class dadosbosch_update():
 
                 self._filtered_df = self._df
                 self.__post_data()
+                self._path.move_file(path_index)  
     
     def __data_formatting(self):
         """
@@ -116,7 +67,7 @@ class dadosbosch_update():
         """
         query = 'INSERT INTO dadosbosch (protRecord_ID,RobotName,Line,Station,Model,Status_PSQ,dateTime, timerName, progNo, Flag224, spotName, wear, wearPerCent, monitorState, monitorState_txt, measureState, regulationStd, iDemand1, iActual1, regulation1, iDemand2, iActual2, regulation2, iDemand3, iActual3, regulation3, phaStd, pha1, pha2, pha3, t_iDemandStd, tActualStd, tipDressCounter, electrodeNo, voltageActualValue, voltageRefValue, currentActualValue, currentReferenceValue, weldTimeActualValue, weldTimeRefValue, energyActualValue, energyRefValue, powerActualValue, powerRefValue, resistanceActualValue, resistanceRefValue, pulseWidthActualValue, pulseWidthRefValue, stabilisationFactorActValue, stabilisationFactorRefValue, uipActualValue, uipRefValue, uirExpulsionTime, uirMeasuringActive, uirRegulationActive, uirMonitoringActive, uirWeldTimeProlongationActive) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)' 
         val = []
-
+        list_val = []
         send = 0
 
         for robot_name in self._list_name:
@@ -189,8 +140,19 @@ class dadosbosch_update():
                     val.append(int(self._filtered_df['uirMonitoringActive'][list_index[index]]))
                     val.append(int(self._filtered_df['uirWeldTimeProlongationActive'][list_index[index]]))
                     
-                    send += 1
-                    self._sql.post_data_dadosbosch(query,val,count = send)
+                    list_val.append(val)
+
+                    if len(list_val) >= 7000:
+                        send += len(list_val)
+                        self._sql.post_data_dadosbosch(query,list_val, count = send)
+                        list_val.clear()
+        
+        if len(list_val) != 0:
+            send += len(list_val)
+            self._sql.post_data_dadosbosch(query,list_val, count = send)
+            self._sql.post_data_dadosbosch(query,list_val)
+            list_val.clear()
+                
 
 
     def __filter_df(self,robot_name: str, tool: int, tool_name: str):

@@ -16,13 +16,12 @@ class sql_manipulation():
         
         self._mycursor = self._mydb.cursor()
 
-    def post_data_wellding(self, line_name: str,electrode_num: int, name_robot: str, n_points_applied: int, n_millins: int,electrode_no: int,tool_name: str, time: str, count = 0):
+    def post_data_wellding(self, vals, count = 0):
         """
         Realizes a data commit to the wellding database.
         """
         sql = "INSERT INTO wellding (line,electrode_num, name_robot, n_points_applied, n_millins,tool, tool_name, time) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
-        val = (line_name,electrode_num, name_robot, n_points_applied, n_millins,electrode_no, tool_name, time)  
-        self._mycursor.execute(sql,val)
+        self._mycursor.executemany(sql,vals)
 
         self._mydb.commit()
         print(count, "record inserted in wellding db.") 
@@ -41,11 +40,11 @@ class sql_manipulation():
         self._mydb.commit()
         print(count, "record inserted in psq db.") 
 
-    def post_data_dadosbosch(self, sql, val, count = 0):
+    def post_data_dadosbosch(self, sql, vals, count = 0):
         """
         Realizes a data commit to the dadosbosch database.
         """
-        self._mycursor.execute(sql,val)
+        self._mycursor.executemany(sql,vals)
         self._mydb.commit()
         print(count, "record inserted in dadosbosch db.")
     
@@ -54,7 +53,7 @@ class sql_manipulation():
         Realizes a data commit to the alarms database.
         """
         sql = "INSERT INTO alarms (prot_record_id,date_time,timer_name,error_code_1,error_code_1_txt,code_2_interpret,error_code_2,error_code_2_txt,is_error,is_error_txt) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        self._mycursor.execute(sql,val)
+        self._mycursor.executemany(sql,val)
         self._mydb.commit()
 
     def del_data_psq(self, line_name: str, robot_name: str):

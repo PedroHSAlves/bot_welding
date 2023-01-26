@@ -4,7 +4,6 @@ import csv
 from paths import path_manipulation
 from SQL_manipulation import sql_manipulation
 
-import time
 
 class alarms_update():
     def __init__(self):
@@ -18,27 +17,14 @@ class alarms_update():
 
             if'Protocolo de erros' in file_path:
                 try:
-                    start_time = time.time()
                     #optimizing the reading of the csv file.
-                    col_types = {
-                        '"protRecord_ID"': np.int32,
-                        '"timerName"': 'category',
-                        '"errorCode1"': np.int32,
-                        '"errorCode1_txt"': 'category',
-                        '"Code2Interpret"': np.int32,
-                        '"errorCode2"': np.int32,
-                        '"errorCode2_txt"': 'category',
-                        '"isError"': 'category',
-                        '"isError_txt"': 'category'
-                    }
                     usecols = ['"protRecord_ID"', '"dateTime"', '"timerName"', '"errorCode1"', '"errorCode1_txt"',
                         '"Code2Interpret"', '"errorCode2"', '"errorCode2_txt"', '"isError"', '"isError_txt"']
 
-                    self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";",dtype = col_types, usecols = usecols)
-
-                    print(time.time() - start_time)
+                    self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";", usecols = usecols)
+                    self._df.dropna()
                 except Exception as e:
-                    raise print(f"An error occurred while trying to read the CSV file: {e}")
+                    raise TypeError("CSV reading failed. file Name {file_path}. {e}")
 
                 self.__data_formatting()
                 self._filtered_df = self._df
@@ -57,6 +43,7 @@ class alarms_update():
 
     def __post_data(self):
         val = []
+        list_vals = []
 
         df_mask_date = self._df['dateTime'] >= self._sql.get_last_time_alarms()
         positions_date = np.flatnonzero(df_mask_date)
@@ -86,7 +73,16 @@ class alarms_update():
             val.append(str(self._filtered_df['isError'][index]))
             val.append(self._filtered_df['isError_txt'][index])
 
-            self._sql.post_data_alarms(val)
+            list_vals.append(val)
 
-            submitted += 1
+            if len(list_vals) >= 7000:
+                self._sql.post_data_alarms(list_vals)
+
+                submitted += len(list_vals)
+                print(f"{submitted} / {total_quantity} alarms")
+                    
+        if len(list_vals) != 0:
+            self._sql.post_data_alarms(list_vals)
+
+            submitted += len(list_vals)
             print(f"{submitted} / {total_quantity} alarms")

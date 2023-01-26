@@ -15,22 +15,18 @@ class electrode_update():
 
             if 'Protocolo valores de corrente' in file_path:
                 try:
-                    col_types = {'"dateTime"': str,
-                        '"timerName"':str,
-                        '"tipDressCounter"':int,
-                        '"electrodeNo"':int}
                     usecols = ['"dateTime"', '"timerName"','"tipDressCounter"', '"electrodeNo"']
-                    self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";", usecols = usecols, dtype = col_types)
+                    self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";", usecols = usecols)
+                    self._df.dropna()
                 except Exception as e:
-                    raise TypeError("CSV reading failed, {e}")
+                    raise TypeError("CSV reading failed. file Name {file_path}. {e}")
 
                 self.__data_formatting()
                 self._filtered_df = self._df
 
                 self._list_name = self._df['timerName'].unique()
 
-                self.__main()
-                self._path.move_file(path_index)        
+                self.__main()      
 
     def __data_formatting(self):
         """
@@ -43,6 +39,8 @@ class electrode_update():
         """
         Applies the filter for each existing robot in the CSV file.
         """
+        self._list_vals = []
+        self._send = 0
         for robot_name in self._list_name:
             for tool in self.__get_electrode_no(robot_name):
                 self._tool_name = f"{self._line_name}_{robot_name}_{tool}"
@@ -63,6 +61,11 @@ class electrode_update():
                 self._filtered_df = self._filtered_df.iloc[positions_names]
 
                 self.__check_electrode_change(robot_name,tool)
+
+        if len(self._list_vals) > 0:
+            self._send += len(self._list_vals)
+            self._sql.post_data_wellding(self._list_vals, count = self._send)
+            self._list_vals.clear()
 
     def __get_electrode_no(self,robot_name: str):
         """
@@ -90,6 +93,7 @@ class electrode_update():
         count = 1 
         points_applied = 0
         n_milling = 0
+        val = []
         
         ### DEBUG AREA
         # print("\nLine name: ",self._line_name)
@@ -111,7 +115,23 @@ class electrode_update():
                 time = time[:19]
 
                 if self._last_date != time[:19]:
-                    self._sql.post_data_wellding(self._line_name,self._last_electrode_num,robot_name,points_applied, n_milling,int(tool),self._tool_name,time)
+                    val.clear()
+                    val.append(self._line_name)
+                    val.append(self._last_electrode_num)
+                    val.append(robot_name)
+                    val.append(points_applied)
+                    val.append(n_milling)
+                    val.append(int(tool))
+                    val.append(self._tool_name)
+                    val.append(time)
+                    
+                    self._list_vals.append(val)
+                    
+
+                    if len(self._list_vals) >= 7000:
+                        self._send += len(self._list_vals)
+                        self._sql.post_data_wellding(self._list_vals, count = self._send)
+                        self._list_vals.clear()
 
                 points_applied = 0
             else:

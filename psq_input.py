@@ -15,17 +15,12 @@ class psq_update():
             
             if 'Protocolo valores de corrente' in file_path:
                 try:
-                    col_types = {'"dateTime"': str,
-                        '"timerName"':str,
-                        '"tipDressCounter"':int,
-                        '"electrodeNo"':int,
-                        '"uirMeasuringActive"':int,
-                        '"uirRegulationActive"':int,
-                        '"uirMonitoringActive"':int}
                     usecols = ['"dateTime"', '"timerName"','"tipDressCounter"', '"electrodeNo"','"uirMeasuringActive"', '"uirRegulationActive"', '"uirMonitoringActive"']
-                    self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";", usecols = usecols, dtype = col_types)
+                    self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";", usecols = usecols)
+                    self._df.dropna()
+
                 except Exception as e:
-                    raise TypeError(f"CSV reading failed, {e}")
+                    raise TypeError(f"CSV reading failed. file Name {file_path}. {e}")
 
                 self.__data_formatting()
                 self._filtered_df = self._df
