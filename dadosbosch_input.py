@@ -15,13 +15,65 @@ class dadosbosch_update():
 
             if 'Protocolo valores de corrente' in file_path:
                 try:
-                    self._df = pd.read_csv(file_path, quoting= csv.QUOTE_NONE, sep = ";")
-                except:
-                    TypeError("CSV reading failed")
+                    col_types = {'"protRecord_ID"':int,
+                        '"dateTime"': str,
+                        '"timerName"':str,
+                        '"progNo"':int,
+                        '"spotName"':str,
+                        '"wear"':float,
+                        '"wearPerCent"':float,
+                        '"monitorState"':int,
+                        '"monitorState_txt"':str,
+                        '"measureState"':int,
+                        '"regulationStd"':int,
+                        '"iDemand1"':float,
+                        '"iActual1"':float,
+                        '"regulation1"':int,
+                        '"iDemand2"':float,
+                        '"iActual2"':float,
+                        '"regulation2"':int,
+                        '"iDemand3"':float,
+                        '"iActual3"':float,
+                        '"regulation3"':int,
+                        '"phaStd"':float,
+                        '"pha1"':float,
+                        '"pha2"':float,
+                        '"pha3"':float,
+                        '"t_iDemandStd"':float,
+                        '"tActualStd"':float,
+                        '"tipDressCounter"':int,
+                        '"electrodeNo"':int,
+                        '"voltageActualValue"':float,
+                        '"voltageRefValue"':float,
+                        '"currentActualValue"':float,
+                        '"currentReferenceValue"':float,
+                        '"weldTimeActualValue"':int,
+                        '"weldTimeRefValue"':int,
+                        '"energyActualValue"':float,
+                        '"energyRefValue"':float,
+                        '"powerActualValue"':float,
+                        '"powerRefValue"':float,
+                        '"resistanceActualValue"':int,
+                        '"resistanceRefValue"':int,
+                        '"pulseWidthActualValue"':float,
+                        '"pulseWidthRefValue"':float,
+                        '"stabilisationFactorActValue"':float,
+                        '"stabilisationFactorRefValue"':float,
+                        '"uipActualValue"':int,
+                        '"uipRefValue"':int,
+                        '"uirExpulsionTime"':int,
+                        '"uirMeasuringActive"':int,
+                        '"uirRegulationActive"':int,
+                        '"uirMonitoringActive"':int,
+                        '"uirWeldTimeProlongationActive"':int}
+                    usecols = ['"protRecord_ID"','"dateTime"', '"timerName"', '"progNo"', '"spotName"', '"wear"', '"wearPerCent"', '"monitorState"', '"monitorState_txt"', '"measureState"', '"regulationStd"', '"iDemand1"', '"iActual1"', '"regulation1"', '"iDemand2"', '"iActual2"', '"regulation2"', '"iDemand3"', '"iActual3"', '"regulation3"', '"phaStd"', '"pha1"', '"pha2"', '"pha3"', '"t_iDemandStd"', '"tActualStd"', '"tipDressCounter"', '"electrodeNo"', '"voltageActualValue"', '"voltageRefValue"', '"currentActualValue"', '"currentReferenceValue"', '"weldTimeActualValue"', '"weldTimeRefValue"', '"energyActualValue"', '"energyRefValue"', '"powerActualValue"', '"powerRefValue"', '"resistanceActualValue"', '"resistanceRefValue"', '"pulseWidthActualValue"', '"pulseWidthRefValue"', '"stabilisationFactorActValue"', '"stabilisationFactorRefValue"', '"uipActualValue"', '"uipRefValue"', '"uirExpulsionTime"', '"uirMeasuringActive"', '"uirRegulationActive"', '"uirMonitoringActive"', '"uirWeldTimeProlongationActive"']
+                    self._df = pd.read_csv(file_path, quoting= csv.QUOTE_NONE, sep = ";", usecols = usecols, dtype = col_types)
+                except Exception as e:
+                   raise TypeError(f"CSV reading failed, {e}")
                 
                 self.__data_formatting()
                 self._list_name = self._df['timerName'].unique()
-
+                
                 self.__add_psq_column()
                 self.__add_flag_224()
 
@@ -34,6 +86,10 @@ class dadosbosch_update():
         """
         self._df.columns = self._df.columns.str.replace(r'"', '')
         self._df['timerName'] = self._df['timerName'].str.replace(r'"', '')
+
+        self._df.columns = self._df.columns.str.replace(r'"', '')
+        self._df['spotName'] = self._df['spotName'].str.replace(r'"', '')
+        
 
     def __add_psq_column(self):
         """
@@ -58,8 +114,10 @@ class dadosbosch_update():
     def __post_data(self):
         """
         """
-        query = 'INSERT INTO dadosbosch (prot_record_id,tool_name,line,station,model,status_psq,date_time,timer_name,prog_no,flag_224,spot_name,wear,wear_per_cent,monitor_state,monitor_state_txt,measure_state,regulation_std,i_demand_1,i_actual_1,	regulation_1,i_demand_2,i_actual_2,regulation_2,i_demand_3,i_actual_3,regulation_3,pha_std,pha_1,pha_2,pha_3,t_i_demand_std,t_actual_std,tip_dress_counter,electrode_no,voltage_actual_value,voltage_ref_value,currentActualValue,current_reference_value,weld_time_actual_value,weld_time_ref_value,energy_actual_value,energy_ref_value,power_actual_value,power_ref_value,resistance_actual_value,resistance_ref_value,pulse_width_actual_value,	pulse_width__ref_value,	stabilisation_factor_act_value,	stabilisation_factor_ref_value,uip_actual_value,uip_ref_value,uir_expulsion_time,uir_measuring_active,uir_regulation_active,uir_monitoring_active,uir_weld_time_prolongation_active) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)' 
+        query = 'INSERT INTO dadosbosch (protRecord_ID,RobotName,Line,Station,Model,Status_PSQ,dateTime, timerName, progNo, Flag224, spotName, wear, wearPerCent, monitorState, monitorState_txt, measureState, regulationStd, iDemand1, iActual1, regulation1, iDemand2, iActual2, regulation2, iDemand3, iActual3, regulation3, phaStd, pha1, pha2, pha3, t_iDemandStd, tActualStd, tipDressCounter, electrodeNo, voltageActualValue, voltageRefValue, currentActualValue, currentReferenceValue, weldTimeActualValue, weldTimeRefValue, energyActualValue, energyRefValue, powerActualValue, powerRefValue, resistanceActualValue, resistanceRefValue, pulseWidthActualValue, pulseWidthRefValue, stabilisationFactorActValue, stabilisationFactorRefValue, uipActualValue, uipRefValue, uirExpulsionTime, uirMeasuringActive, uirRegulationActive, uirMonitoringActive, uirWeldTimeProlongationActive) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)' 
         val = []
+
+        send = 0
 
         for robot_name in self._list_name:
             for tool in self.__get_electrode_no(robot_name):
@@ -130,8 +188,9 @@ class dadosbosch_update():
                     val.append(int(self._filtered_df['uirRegulationActive'][list_index[index]]))
                     val.append(int(self._filtered_df['uirMonitoringActive'][list_index[index]]))
                     val.append(int(self._filtered_df['uirWeldTimeProlongationActive'][list_index[index]]))
-
-                    self._sql.post_data_dadosbosch(query,val)
+                    
+                    send += 1
+                    self._sql.post_data_dadosbosch(query,val,count = send)
 
 
     def __filter_df(self,robot_name: str, tool: int, tool_name: str):

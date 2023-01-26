@@ -4,7 +4,6 @@ import csv
 from paths import path_manipulation
 from SQL_manipulation import sql_manipulation
 
-
 class electrode_update():
     def __init__(self):
         self._path = path_manipulation()
@@ -16,9 +15,14 @@ class electrode_update():
 
             if 'Protocolo valores de corrente' in file_path:
                 try:
-                    self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";")
-                except:
-                    TypeError("CSV reading failed")
+                    col_types = {'"dateTime"': str,
+                        '"timerName"':str,
+                        '"tipDressCounter"':int,
+                        '"electrodeNo"':int}
+                    usecols = ['"dateTime"', '"timerName"','"tipDressCounter"', '"electrodeNo"']
+                    self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";", usecols = usecols, dtype = col_types)
+                except Exception as e:
+                    raise TypeError("CSV reading failed, {e}")
 
                 self.__data_formatting()
                 self._filtered_df = self._df

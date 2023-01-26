@@ -15,9 +15,17 @@ class psq_update():
             
             if 'Protocolo valores de corrente' in file_path:
                 try:
-                    self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";")
-                except:
-                    TypeError("CSV reading failed")
+                    col_types = {'"dateTime"': str,
+                        '"timerName"':str,
+                        '"tipDressCounter"':int,
+                        '"electrodeNo"':int,
+                        '"uirMeasuringActive"':int,
+                        '"uirRegulationActive"':int,
+                        '"uirMonitoringActive"':int}
+                    usecols = ['"dateTime"', '"timerName"','"tipDressCounter"', '"electrodeNo"','"uirMeasuringActive"', '"uirRegulationActive"', '"uirMonitoringActive"']
+                    self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";", usecols = usecols, dtype = col_types)
+                except Exception as e:
+                    raise TypeError(f"CSV reading failed, {e}")
 
                 self.__data_formatting()
                 self._filtered_df = self._df
@@ -48,6 +56,8 @@ class psq_update():
         """
         Applies the filter for each existing robot in the CSV file.
         """
+
+        send = 0
         for robot_name in self._list_name:
             for tool in self.__get_electrode_no(robot_name):
                 tool_name = f"{self._line_name}_{robot_name}_{tool}"
@@ -73,7 +83,8 @@ class psq_update():
                     number_points += int(self._filtered_df['tipDressCounter'].count())
                     num_points_psq_off += self.__count_psq_off()
 
-                    self._sql.post_data_psq(self._line_name,tool_name, self.__get_last_psq(), number_points, num_points_psq_off, self.__last_update())
+                    send += 1
+                    self._sql.post_data_psq(self._line_name,tool_name, self.__get_last_psq(), number_points, num_points_psq_off, self.__last_update(), count = send)
     
     def __get_electrode_no(self,robot_name: str):
         """

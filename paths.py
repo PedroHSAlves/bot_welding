@@ -1,8 +1,8 @@
 import os
 import shutil
 
-#ROOT_FILE = r'D:\Perfil'
-#DESTINATION_FOLDER = r'D:\Perfil2'
+# ROOT_FILE = r'D:\Perfil'
+# DESTINATION_FOLDER = r'D:\Perfil2'
 
 #Test Variables
 ROOT_FILE = r'W:'#Teste root
@@ -40,8 +40,8 @@ class path_manipulation():
             if folder_name not in os.listdir(DESTINATION_FOLDER):
                  os.makedirs(destination_path)
             shutil.move(origin_path, destination_path)
-        except:
-            raise TypeError("Error when moving the directory file")
+        except Exception as e:
+            raise TypeError(f"Error when moving the directory file: {e}")
 
     def get_line_name(self,index:int):
         """

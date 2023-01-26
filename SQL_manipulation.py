@@ -8,15 +8,15 @@ class sql_manipulation():
                 host = "172.20.233.63",
                 user = auth._user,
                 password = auth._password,
-                # database = "perfil"
-                database = "teste"
+                database = "perfil"
+                #database = "teste"
             )
-        except:
-            TypeError("database connection failure.")
+        except Exception as e:
+            print(f"database connection failure. {e}")
         
         self._mycursor = self._mydb.cursor()
 
-    def post_data_wellding(self, line_name: str,electrode_num: int, name_robot: str, n_points_applied: int, n_millins: int,electrode_no: int,tool_name: str, time: str):
+    def post_data_wellding(self, line_name: str,electrode_num: int, name_robot: str, n_points_applied: int, n_millins: int,electrode_no: int,tool_name: str, time: str, count = 0):
         """
         Realizes a data commit to the wellding database.
         """
@@ -25,9 +25,9 @@ class sql_manipulation():
         self._mycursor.execute(sql,val)
 
         self._mydb.commit()
-        print(self._mycursor.rowcount, "record inserted in wellding db.") 
+        print(count, "record inserted in wellding db.") 
 
-    def post_data_psq(self,line_name: str, robot_name: str, status_psq: int, number_points: int, num_points_psq_off: int, last_update):
+    def post_data_psq(self,line_name: str, robot_name: str, status_psq: int, number_points: int, num_points_psq_off: int, last_update, count = 0):
         """
         Realizes a data commit to the psq database.
         """
@@ -39,15 +39,15 @@ class sql_manipulation():
         self._mycursor.execute(sql,val)
 
         self._mydb.commit()
-        print(self._mycursor.rowcount, "record inserted in psq db.") 
+        print(count, "record inserted in psq db.") 
 
-    def post_data_dadosbosch(self, sql, val):
+    def post_data_dadosbosch(self, sql, val, count = 0):
         """
         Realizes a data commit to the dadosbosch database.
         """
         self._mycursor.execute(sql,val)
         self._mydb.commit()
-        print(self._mycursor.rowcount, "record inserted in dadosbosch db.")
+        print(count, "record inserted in dadosbosch db.")
     
     def post_data_alarms(self,val):
         """
@@ -56,8 +56,6 @@ class sql_manipulation():
         sql = "INSERT INTO alarms (prot_record_id,date_time,timer_name,error_code_1,error_code_1_txt,code_2_interpret,error_code_2,error_code_2_txt,is_error,is_error_txt) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
         self._mycursor.execute(sql,val)
         self._mydb.commit()
-
-        print(self._mycursor.rowcount, "record inserted in alarms db.")
 
     def del_data_psq(self, line_name: str, robot_name: str):
         """
@@ -170,7 +168,7 @@ class sql_manipulation():
         """
         Get the last delta time recorded in the database.
         """
-        sql = "SELECT `tool_name`,`line`,`date_time` FROM `dadosbosch` WHERE `line` = %s AND `tool_name` = %s ORDER BY `date_time` DESC LIMIT 1"
+        sql = "SELECT `RobotName`,`Line`,`dateTime` FROM `dadosbosch` WHERE `Line` = %s AND `RobotName` = %s ORDER BY `dateTime` DESC LIMIT 1"
         val = (line_name, tool_name)
 
         self._mycursor.execute(sql,val)
