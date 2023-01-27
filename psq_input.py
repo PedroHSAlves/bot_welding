@@ -9,6 +9,8 @@ class psq_update():
         self._path = path_manipulation()
         self._sql = sql_manipulation()
 
+        self._sql
+
         for path_index in range(self._path.len_paths):
             self._line_name = self._path.get_line_name(path_index)
             file_path = self._path.file_path(path_index)
@@ -17,13 +19,17 @@ class psq_update():
                 try:
                     usecols = ['"dateTime"', '"timerName"','"tipDressCounter"', '"electrodeNo"','"uirMeasuringActive"', '"uirRegulationActive"', '"uirMonitoringActive"']
                     self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";", usecols = usecols)
+
                     self._df.dropna()
+                    self._df['"dateTime"'] = pd.to_datetime(self._df['"dateTime"'])
+                    self._df['"dateTime"'] = self._df['"dateTime"'].dt.strftime('%Y-%m-%d %H:%M:%S')
+
 
                 except Exception as e:
                     raise TypeError(f"CSV reading failed. file Name {file_path}. {e}")
 
                 self.__data_formatting()
-                self._filtered_df = self._df
+                self._filtered_df =self._df
 
                 self._list_name = self._df['timerName'].unique()
 
@@ -62,7 +68,7 @@ class psq_update():
                 
 
                 #filters
-                df_mask_date = self._df['dateTime'] > last_update
+                df_mask_date = pd.to_datetime(self._df['dateTime']) > pd.to_datetime(last_update)
                 positions_date = np.flatnonzero(df_mask_date)
                 self._filtered_df = self._df.iloc[positions_date]
 
@@ -89,7 +95,8 @@ class psq_update():
         positions_date = np.flatnonzero(df_mask_date)
         aux_df = self._df.iloc[positions_date]
 
-        return aux_df['electrodeNo'].unique()
+        return aux_df['electrodeNo'].dropna().unique().tolist()
+
 
     def __count_psq_off(self):
         """

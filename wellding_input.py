@@ -18,6 +18,9 @@ class electrode_update():
                     usecols = ['"dateTime"', '"timerName"','"tipDressCounter"', '"electrodeNo"']
                     self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";", usecols = usecols)
                     self._df.dropna()
+
+                    self._df['"dateTime"'] = pd.to_datetime(self._df['"dateTime"'])
+                    self._df['"dateTime"'] = self._df['"dateTime"'].dt.strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
                     raise TypeError("CSV reading failed. file Name {file_path}. {e}")
 
@@ -48,7 +51,7 @@ class electrode_update():
                 self._last_milling_SQL = self._sql.get_last_milling(self._line_name,self._tool_name)
                 
                 #filters
-                df_mask_date = self._df['dateTime'] > self._last_date
+                df_mask_date = pd.to_datetime(self._df['dateTime']) > pd.to_datetime(self._last_date)
                 positions_date = np.flatnonzero(df_mask_date)
                 self._filtered_df = self._df.iloc[positions_date]
 
@@ -74,8 +77,8 @@ class electrode_update():
         df_mask_date = self._df['timerName'] == robot_name
         positions_date = np.flatnonzero(df_mask_date)
         aux_df = self._df.iloc[positions_date]
-
-        return aux_df['electrodeNo'].unique()
+        
+        return aux_df['electrodeNo'].dropna().unique().tolist()
 
     def __get_last_electrode(self, tool,robot_name:str):
         """

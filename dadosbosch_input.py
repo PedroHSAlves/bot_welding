@@ -4,6 +4,7 @@ import csv
 from paths import path_manipulation
 from SQL_manipulation import sql_manipulation
 
+import time
 class dadosbosch_update():
     def __init__(self):
         self._path = path_manipulation()
@@ -18,10 +19,16 @@ class dadosbosch_update():
                     usecols = ['"protRecord_ID"','"dateTime"', '"timerName"', '"progNo"', '"spotName"', '"wear"', '"wearPerCent"', '"monitorState"', '"monitorState_txt"', '"measureState"', '"regulationStd"', '"iDemand1"', '"iActual1"', '"regulation1"', '"iDemand2"', '"iActual2"', '"regulation2"', '"iDemand3"', '"iActual3"', '"regulation3"', '"phaStd"', '"pha1"', '"pha2"', '"pha3"', '"t_iDemandStd"', '"tActualStd"', '"tipDressCounter"', '"electrodeNo"', '"voltageActualValue"', '"voltageRefValue"', '"currentActualValue"', '"currentReferenceValue"', '"weldTimeActualValue"', '"weldTimeRefValue"', '"energyActualValue"', '"energyRefValue"', '"powerActualValue"', '"powerRefValue"', '"resistanceActualValue"', '"resistanceRefValue"', '"pulseWidthActualValue"', '"pulseWidthRefValue"', '"stabilisationFactorActValue"', '"stabilisationFactorRefValue"', '"uipActualValue"', '"uipRefValue"', '"uirExpulsionTime"', '"uirMeasuringActive"', '"uirRegulationActive"', '"uirMonitoringActive"', '"uirWeldTimeProlongationActive"']
                     self._df = pd.read_csv(file_path, quoting= csv.QUOTE_NONE, sep = ";", usecols = usecols, keep_default_na = False)
                     self._df.dropna()
-                except Exception as e:
-                   raise TypeError(f"CSV reading failed. file Name {file_path}. {e}")
+
+                except:
+                    try:
+                        self._df = pd.read_csv(file_path, quoting= csv.QUOTE_NONE, sep = ";", usecols = usecols, keep_default_na = False, low_memory = False)
+                    except Exception as e:
+                        raise TypeError(f"CSV reading failed. file Name {file_path}. {e}")
                 
+                start_time = time.time()
                 self.__data_formatting()
+                print(time.time() - start_time)
                 self._list_name = self._df['timerName'].unique()
                 
                 self.__add_psq_column()
@@ -36,6 +43,14 @@ class dadosbosch_update():
         Fixes formatting of columns imported from CSV.
         """
         self._df.columns = self._df.columns.str.replace(r'"', '')
+
+        self._df['dateTime'] = pd.to_datetime(self._df['dateTime'])
+        self._df['dateTime'] = self._df['dateTime'].dt.strftime('%Y-%m-%d %H:%M:%S')
+
+        self._df = self._df[self._df['pha1'] != ""]
+
+        # self._df['pha1'] = self._df['pha1'].apply(lambda x: float(x) if x !='' else -1)
+
         self._df['timerName'] = self._df['timerName'].str.replace(r'"', '')
 
         self._df.columns = self._df.columns.str.replace(r'"', '')
@@ -150,7 +165,6 @@ class dadosbosch_update():
         if len(list_val) != 0:
             send += len(list_val)
             self._sql.post_data_dadosbosch(query,list_val, count = send)
-            self._sql.post_data_dadosbosch(query,list_val)
             list_val.clear()
                 
 
@@ -161,7 +175,7 @@ class dadosbosch_update():
         """
         _last_date = self._sql.get_last_time_dadosbosch(self._line_name,tool_name)
 
-        df_mask_date = self._df['dateTime'] > _last_date
+        df_mask_date = pd.to_datetime(self._df['dateTime']) > pd.to_datetime(_last_date)
         positions_date = np.flatnonzero(df_mask_date)
         self._filtered_df = self._df.iloc[positions_date]
 
@@ -181,5 +195,5 @@ class dadosbosch_update():
         df_mask_date = self._df['timerName'] == robot_name
         positions_date = np.flatnonzero(df_mask_date)
         aux_df = self._df.iloc[positions_date]
-
-        return aux_df['electrodeNo'].unique()
+        
+        return aux_df['electrodeNo'].dropna().unique().tolist()

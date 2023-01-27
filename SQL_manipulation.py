@@ -38,7 +38,7 @@ class sql_manipulation():
         self._mycursor.execute(sql,val)
 
         self._mydb.commit()
-        print(count, "record inserted in psq db.") 
+        print(count, "record inserted in psq db. ", line_name) 
 
     def post_data_dadosbosch(self, sql, vals, count = 0):
         """

@@ -23,6 +23,9 @@ class alarms_update():
 
                     self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";", usecols = usecols)
                     self._df.dropna()
+
+                    self._df['"dateTime"'] = pd.to_datetime(self._df['"dateTime"'])
+                    self._df['"dateTime"'] = self._df['"dateTime"'].dt.strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
                     raise TypeError("CSV reading failed. file Name {file_path}. {e}")
 
@@ -45,7 +48,7 @@ class alarms_update():
         val = []
         list_vals = []
 
-        df_mask_date = self._df['dateTime'] >= self._sql.get_last_time_alarms()
+        df_mask_date = pd.to_datetime(self._df['dateTime']) > pd.to_datetime(self._sql.get_last_time_alarms())
         positions_date = np.flatnonzero(df_mask_date)
         self._filtered_df = self._df.iloc[positions_date]
 
