@@ -29,6 +29,7 @@ class electrode_update():
 
                 self._list_name = self._df['timerName'].unique()
 
+                print(f"wellding - file start: {file_path}")
                 self.__main()      
 
     def __data_formatting(self):

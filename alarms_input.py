@@ -31,6 +31,8 @@ class alarms_update():
 
                 self.__data_formatting()
                 self._filtered_df = self._df
+
+                print(f"alarms - file start: {file_path}")
                 self.__post_data()
                 self._path.move_file(path_index)
 

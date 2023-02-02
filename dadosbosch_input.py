@@ -4,7 +4,6 @@ import csv
 from paths import path_manipulation
 from SQL_manipulation import sql_manipulation
 
-import time
 class dadosbosch_update():
     def __init__(self):
         self._path = path_manipulation()
@@ -26,15 +25,14 @@ class dadosbosch_update():
                     except Exception as e:
                         raise TypeError(f"CSV reading failed. file Name {file_path}. {e}")
                 
-                start_time = time.time()
                 self.__data_formatting()
-                print(time.time() - start_time)
                 self._list_name = self._df['timerName'].unique()
                 
                 self.__add_psq_column()
                 self.__add_flag_224()
 
                 self._filtered_df = self._df
+                print(f"dadosbosch - file start: {file_path}")
                 self.__post_data()
                 self._path.move_file(path_index)  
     
@@ -56,7 +54,6 @@ class dadosbosch_update():
         self._df.columns = self._df.columns.str.replace(r'"', '')
         self._df['spotName'] = self._df['spotName'].str.replace(r'"', '')
         
-
     def __add_psq_column(self):
         """
         Add a column in the dataframe, with the PSQ status calculations.
@@ -167,8 +164,6 @@ class dadosbosch_update():
             self._sql.post_data_dadosbosch(query,list_val, count = send)
             list_val.clear()
                 
-
-
     def __filter_df(self,robot_name: str, tool: int, tool_name: str):
         """
         Filters the dataframe by robot_name, tool, time.
@@ -186,7 +181,6 @@ class dadosbosch_update():
         df_mask_names = self._filtered_df['electrodeNo'] == tool
         positions_names = np.flatnonzero(df_mask_names)
         self._filtered_df = self._filtered_df.iloc[positions_names]
-
 
     def __get_electrode_no(self, robot_name: str):
         """

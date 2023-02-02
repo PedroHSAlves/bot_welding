@@ -5,8 +5,8 @@ import shutil
 # DESTINATION_FOLDER = r'D:\Perfil2'
 
 #Test Variables
-ROOT_FILE = r'W:'#Teste root
-DESTINATION_FOLDER = r'C:\Users\sc29697\Documents\UOF_PCM13'
+ROOT_FILE = r'V:'#perfil2
+DESTINATION_FOLDER = r'W:' #perfil
 
 # csv_current_value_protocol = r'W:\Respot1OP005\Protocolo valores de corrente16_12_2022_08_25_55.txt'
 # line_name = r'Respot 1'

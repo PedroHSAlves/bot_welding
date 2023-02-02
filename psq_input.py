@@ -34,6 +34,7 @@ class psq_update():
                 self._list_name = self._df['timerName'].unique()
 
                 self.__add_psq_column()
+                print(f"psq - file start: {file_path}")
                 self.__main()
     
     def __add_psq_column(self):
@@ -128,6 +129,8 @@ class psq_update():
         """
         Takes the time of the last weld spot applied.
         """
-        result = str(self._filtered_df['dateTime'].tail(1))
-        return result[10:29]
+        date = str(self._filtered_df['dateTime'].tail(1))
+        date = date.split('\n')[0]
+        date = date[-19:]
+        return date[-1:19]
     
