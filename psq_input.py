@@ -20,6 +20,7 @@ class psq_update():
                     usecols = ['"dateTime"', '"timerName"','"tipDressCounter"', '"electrodeNo"','"uirMeasuringActive"', '"uirRegulationActive"', '"uirMonitoringActive"']
                     self._df = pd.read_csv(file_path, quoting=csv.QUOTE_NONE, sep = ";", usecols = usecols)
 
+
                     self._df.dropna()
                     self._df['"dateTime"'] = pd.to_datetime(self._df['"dateTime"'])
                     self._df['"dateTime"'] = self._df['"dateTime"'].dt.strftime('%Y-%m-%d %H:%M:%S')
@@ -131,6 +132,5 @@ class psq_update():
         """
         date = str(self._filtered_df['dateTime'].tail(1))
         date = date.split('\n')[0]
-        date = date[-19:]
-        return date[-1:19]
+        return date[-19:]
     

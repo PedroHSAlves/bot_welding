@@ -1,12 +1,12 @@
 import os
 import shutil
 
-# ROOT_FILE = r'D:\Perfil'
-# DESTINATION_FOLDER = r'D:\Perfil2'
+#ROOT_FILE = r'D:\Perfil'
+#DESTINATION_FOLDER = r'D:\Perfil2'
 
 #Test Variables
-ROOT_FILE = r'V:'#perfil2
-DESTINATION_FOLDER = r'W:' #perfil
+ROOT_FILE = r'W:'#perfil
+DESTINATION_FOLDER = r'V:' #perfil2
 
 # csv_current_value_protocol = r'W:\Respot1OP005\Protocolo valores de corrente16_12_2022_08_25_55.txt'
 # line_name = r'Respot 1'
@@ -34,6 +34,7 @@ class path_manipulation():
         """
         origin_path = self._list_paths[index]
         folder_name = origin_path[3:origin_path.find('PC')+3]
+        folder_name = folder_name.split('Perfil\\')[-1]
         destination_path = f'{DESTINATION_FOLDER}\{folder_name}'
         
         try:
@@ -48,7 +49,7 @@ class path_manipulation():
         Return the name of the production line
         """
         path = self._list_paths[index]
-        return path[3:path.find('PC')]
+        return path[3:path.find('PC')].split('Perfil\\')[-1]
 
     @property
     def len_paths(self):
