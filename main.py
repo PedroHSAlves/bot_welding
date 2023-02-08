@@ -9,9 +9,9 @@ star_time = time.time()
 print("running program...")#Debug print
 
 alarms_update()
-psq_update()
-electrode_update() 
-dadosbosch_update()
+#psq_update()
+#electrode_update() 
+#dadosbosch_update()
 
 print(f"End of execution, time elapsed:   {time.time() - star_time}")#Debug print
 print("\nPress any key to finish the program...")

@@ -38,8 +38,7 @@ class path_manipulation():
         destination_path = f'{DESTINATION_FOLDER}\{folder_name}'
         
         try:
-            if folder_name not in os.listdir(DESTINATION_FOLDER):
-                 os.makedirs(destination_path)
+            os.makedirs(destination_path, exist_ok = True)
             shutil.move(origin_path, destination_path)
         except Exception as e:
             raise TypeError(f"Error when moving the directory file: {e}")
